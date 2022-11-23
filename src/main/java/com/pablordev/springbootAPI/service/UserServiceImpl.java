@@ -30,18 +30,24 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
+        if (!userRepository.existsById(id)) throw new IllegalStateException("User with id " + id + " does not exist");
+
         return userRepository.findById(id);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findByEmail(String email) {
+        if (!userRepository.existsByEmail(email)) throw new IllegalStateException("User with email " + email + " does not exist");
+
         return userRepository.findByEmail(email);
     }
 
     @Override
     @Transactional
     public void deleteById(Long id) {
+        if (!userRepository.existsById(id)) throw new IllegalStateException("User with id " + id + " does not exist");
+
         userRepository.deleteById(id);
     }
 
