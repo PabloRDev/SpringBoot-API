@@ -28,7 +28,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.findById(id);
-        if (user.isEmpty()) return ResponseEntity.notFound().build();
+        if (user.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 
         return ResponseEntity.ok(user);
     }
@@ -36,10 +36,21 @@ public class UserController {
     @GetMapping("/email/{email}")
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
         Optional<User> user = userService.findByEmail(email);
-        if (user.isEmpty()) return ResponseEntity.notFound().build();
+        if (user.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 
         return ResponseEntity.ok(user);
     }
+
+    @GetMapping("/email/{email}/exists")
+    public ResponseEntity<?> existsEmail(@PathVariable String email) {
+        Boolean exists = userService.existsByEmail(email);
+        if (!exists) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+
+        User user = userService.findByEmail(email).get();
+
+        return ResponseEntity.ok(user);
+    }
+
 
     @PostMapping
     public ResponseEntity<?> createUser(@RequestBody User user) {
@@ -49,18 +60,20 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User userDetails) {
         Optional<User> user = userService.findById(id);
-        if (user.isEmpty()) return ResponseEntity.notFound().build();
+        if (user.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 
         BeanUtils.copyProperties(userDetails, user.get(),
                 "id");
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.save(user.get()));
+        User updatedUser = userService.save(user.get());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(updatedUser);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable Long id) {
         Optional<User> user = userService.findById(id);
-        if (user.isEmpty()) return ResponseEntity.notFound().build();
+        if (user.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 
 
         userService.deleteById(id);
